@@ -5,21 +5,29 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/codezera11/pokedex/internal/pokeapi"
 )
+
+type config struct {
+	pokeapiClient    pokeapi.Client
+	nextLocationsURL *string
+	prevLocationsURL *string
+}
 
 type cliCommand struct {
 	name string
 	description string
-	callback func() error
+	callback func(config *config) error
 }
 
-func startRepl() {
+func startRepl(cfg *config) {
 	reader := bufio.NewScanner(os.Stdin)
 
 	for {
 		fmt.Print("Pokedex > ")
 		reader.Scan()
-
+ 
 		words := cleanInput(reader.Text())
 
 		if len(words) == 0 {
@@ -29,7 +37,7 @@ func startRepl() {
 		command, exists := getCommands()[words[0]]
 
 		if exists {
-			err := command.callback()
+			err := command.callback(cfg)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -59,6 +67,16 @@ func getCommands() map[string]cliCommand {
 			name:        "exit",
 			description: "Exit the Pokedex",
 			callback:  commandExit,
+		},
+		"map": {
+			name: "map",
+			description: "Displays areas of pokemon world in incremental manner",
+			callback: commandMapf,
+		},
+		"mapb": {
+			name: "mapb",
+			description: "Goes back to pre page",
+			callback: commandMapb,
 		},
 	}
 }
