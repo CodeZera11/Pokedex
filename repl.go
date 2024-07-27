@@ -18,7 +18,7 @@ type config struct {
 type cliCommand struct {
 	name string
 	description string
-	callback func(config *config) error
+	callback func(config *config, args ...string) error
 }
 
 func startRepl(cfg *config) {
@@ -36,8 +36,14 @@ func startRepl(cfg *config) {
 
 		command, exists := getCommands()[words[0]]
 
+		args := []string{}
+
+		if len(words) > 1 {
+			args = words[1:]
+		}
+
 		if exists {
-			err := command.callback(cfg)
+			err := command.callback(cfg, args...)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -77,6 +83,11 @@ func getCommands() map[string]cliCommand {
 			name: "mapb",
 			description: "Goes back to pre page",
 			callback: commandMapb,
+		},
+		"explore": {
+			name: "explore",
+			description: "Displays details about a specific area",
+			callback: commandExplore,
 		},
 	}
 }
